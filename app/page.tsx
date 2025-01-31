@@ -39,15 +39,37 @@ function PlayButton({ audioContext, setAudioContext, pitch }) {
   }
 
   return (
-    <Button variant="primary" size="lg" onClick={handlePlay}>
+    <Button variant="primary" size="lg" onClick={handlePlay} style={{ margin: "5px" }}>
       <PlayCircleFill style={{display: "inline", margin: "5px"}}/>
     </Button>
   );
 
 }
 
-export default function Home() {
+function Game() {
   const [audioContext, setAudioContext] = useState(null);
+
+  const [pitches, setPitches] = useState([
+    pitchFreqTable[Math.floor(Math.random()*pitchFreqTable.length)],
+    pitchFreqTable[Math.floor(Math.random()*pitchFreqTable.length)]
+  ]);
+
+  return (
+    <>
+      <PlayButton audioContext={audioContext} setAudioContext={setAudioContext} pitch={pitches[0]}/>
+      <PlayButton audioContext={audioContext} setAudioContext={setAudioContext} pitch={pitches[1]}/>
+
+
+      <div className="flex gap-4 items-center flex-col sm:flex-row">
+        <Button variant="primary" size="lg">Lower</Button>
+        <Button variant="primary" size="lg">Same</Button>
+        <Button variant="primary" size="lg">Higher</Button>
+      </div>
+    </>
+  );
+}
+
+export default function Home() {
 
   return (
     // <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start justify-center">
@@ -58,14 +80,8 @@ export default function Home() {
         <Col md="auto">
         <h1 className="text-4xl sm:text-5xl lg:text-6xl leading-none font-extrabold text-grey tracking-tight mb-8">Toney</h1>
         <p className="text-lg sm:text-xl lg:text-2xl font-medium mb-6 text-grey">Ear trainer for the tone deaf</p>
-        <p>Instructions go here</p>
-          <PlayButton audioContext={audioContext} setAudioContext={setAudioContext} pitch={440}/>
-          <PlayButton audioContext={audioContext} setAudioContext={setAudioContext} pitch={880}/>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <Button variant="primary" size="lg">Higher</Button>
-          <Button variant="primary" size="lg">Same</Button>
-          <Button variant="primary" size="lg">Lower</Button>
-        </div>
+        <p>TODO: Write instructions</p>
+            <Game />
         </Col>
       </Row>
     </Container>
@@ -73,3 +89,19 @@ export default function Home() {
     </>
   );
 }
+
+const pitchFreqTable = [
+  261.626, // C4
+  277.183, // C#4
+  293.665, // D4
+  311.127, // D#4
+  329.628, // E4
+  349.228, // F4
+  369.994, // F#4
+  391.995, // G4
+  415.305, // G#4
+  440.000, // A4
+  466.164, // A#4
+  493.883, // B4
+];
+
