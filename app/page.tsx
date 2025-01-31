@@ -6,23 +6,48 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { PlayCircleFill } from 'react-bootstrap-icons';
+import { useState } from 'react';
 
-export default function Home() {
-  const audioCtx = new AudioContext();
-  let playing = false;
+function PlayButton({ audioContext, setAudioContext, pitch }) {
+  const [oscillator, setOscillator] = useState(null);
+  const [playing, setPlaying] = useState(false);
+
+  function playSound(context) {
+    const newOscillator = context.createOscillator();
+    newOscillator.type = "sine";
+    newOscillator.frequency.setValueAtTime(pitch, context.currentTime);
+    newOscillator.connect(context.destination);
+    setOscillator(context.createOscillator());
+    newOscillator.start();
+    setPlaying(true);
+    setTimeout(() => {
+      newOscillator.stop()
+      setPlaying(false);
+    }, 500);
+  }
 
   function handlePlay() {
     if (playing)
       return;
-    const oscillator = audioCtx.createOscillator();
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
-    oscillator.connect(audioCtx.destination);
-    oscillator.start();
-    playing = true;
-    setTimeout(() => oscillator.stop(), 1000);
-    playing = false;
+    if (!audioContext) {
+      const newAudioContext = new AudioContext();
+      setAudioContext(newAudioContext);
+      playSound(newAudioContext);
+    } else {
+      playSound(audioContext);
+    }
   }
+
+  return (
+    <Button variant="primary" size="lg" onClick={handlePlay}>
+      <PlayCircleFill style={{display: "inline", margin: "5px"}}/>
+    </Button>
+  );
+
+}
+
+export default function Home() {
+  const [audioContext, setAudioContext] = useState(null);
 
   return (
     // <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start justify-center">
@@ -34,7 +59,8 @@ export default function Home() {
         <h1 className="text-4xl sm:text-5xl lg:text-6xl leading-none font-extrabold text-grey tracking-tight mb-8">Toney</h1>
         <p className="text-lg sm:text-xl lg:text-2xl font-medium mb-6 text-grey">Ear trainer for the tone deaf</p>
         <p>Instructions go here</p>
-        <Button variant="primary" size="lg" onClick={handlePlay}><PlayCircleFill color="black" style={{display: "inline", margin: "5px"}}/>Start</Button>
+          <PlayButton audioContext={audioContext} setAudioContext={setAudioContext} pitch={440}/>
+          <PlayButton audioContext={audioContext} setAudioContext={setAudioContext} pitch={880}/>
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <Button variant="primary" size="lg">Higher</Button>
           <Button variant="primary" size="lg">Same</Button>
