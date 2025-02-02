@@ -47,6 +47,21 @@ function PlayButton({ audioContext, setAudioContext, pitch }) {
 
 }
 
+function ChoiceButton({ label, choice, isCorrect, handleClick }) {
+  let variant;
+  if (choice === label)
+    variant = isCorrect? "success" : "danger";
+  else
+    variant = "primary";
+
+
+  return (
+    <Button variant={variant} size="lg" onClick={() => handleClick(label)} disabled={choice} >
+      {label}
+    </Button>
+  );
+}
+
 function Game() {
   const [audioContext, setAudioContext] = useState(null);
 
@@ -55,13 +70,13 @@ function Game() {
     getRandomPitch()
   ]);
 
-  const [answered, setAnswered] = useState(false);
+  const [choice, setChoice] = useState(null);
   const [correct, setCorrect] = useState(false);
 
   console.log(pitches);
 
   function evaluateAnswer(answer) {
-    if (answered)
+    if (choice)
       return;
 
     let correctAnswer;
@@ -76,12 +91,12 @@ function Game() {
     console.log("correctAnswer: ", correctAnswer);
     console.log("answer: ", answer);
     setCorrect(correctAnswer===answer);
-    setAnswered(true);
+    setChoice(answer);
   }
 
   function reset() {
     setPitches([getRandomPitch(), getRandomPitch()]);
-    setAnswered(false);
+    setChoice(null);
     setCorrect(false);
   }
 
@@ -92,20 +107,14 @@ function Game() {
 
 
       <div className="flex gap-4 items-center flex-col sm:flex-row">
-        <Button variant="primary" size="lg" onClick={() => evaluateAnswer("Lower")}>
-          Lower
-        </Button>
-        <Button variant="primary" size="lg" onClick={() => evaluateAnswer("Same")}>
-          Same
-        </Button>
-        <Button variant="primary" size="lg" onClick={() => evaluateAnswer("Higher")}>
-          Higher
-        </Button>
+        <ChoiceButton label="Lower" choice={choice} isCorrect={correct} handleClick={evaluateAnswer} />
+        <ChoiceButton label="Same" choice={choice} isCorrect={correct} handleClick={evaluateAnswer} />
+        <ChoiceButton label="Higher" choice={choice} isCorrect={correct} handleClick={evaluateAnswer} />
       </div>
 
 
       {
-        answered && (
+        choice && (
           (correct && <Banner isCorrect={true} reset={reset}/>) ||
           (!correct && <Banner isCorrect={false} reset={reset}/>)
         )
@@ -127,9 +136,9 @@ function Banner({ isCorrect, reset}) {
   }
   return (
     <>
-      <Alert variant={variant}>
+      { /* <Alert variant={variant}>
         {text}
-      </Alert>
+      </Alert> */}
       <Button variant="primary" size="lg" onClick={() => reset()}>
         Next
       </Button>
