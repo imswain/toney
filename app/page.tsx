@@ -47,13 +47,14 @@ function PlayButton({ audioContext, setAudioContext, pitch }) {
 
 }
 
-function ChoiceButton({ label, choice, isCorrect, handleClick }) {
-  let variant;
-  if (choice === label)
-    variant = isCorrect? "success" : "danger";
-  else
-    variant = "primary";
+function ChoiceButton({ label, choice, correctAnswer, handleClick }) {
+  let variant = "primary";
+  const isCorrect = (choice === correctAnswer);
 
+  if (choice && correctAnswer == label)
+    variant = "success";
+  else if (choice == label)
+    variant = "danger";
 
   return (
     <Button variant={variant} size="lg" onClick={() => handleClick(label)} disabled={choice} >
@@ -70,28 +71,17 @@ function Game() {
     getRandomPitch()
   ]);
 
+  const correctAnswer = getCorrectAnswer(pitches);
+  console.log("correctAnswer: ", correctAnswer);
+
   const [choice, setChoice] = useState(null);
   const [correct, setCorrect] = useState(false);
 
   console.log(pitches);
 
   function evaluateAnswer(answer) {
-    if (choice)
-      return;
-
-    let correctAnswer;
-
-    if (pitches[0] === pitches[1]) {
-      correctAnswer = "Same";
-    } else if (pitches[0] < pitches[1]) {
-      correctAnswer = "Higher";
-    } else {
-      correctAnswer = "Lower";
-    }
-    console.log("correctAnswer: ", correctAnswer);
-    console.log("answer: ", answer);
-    setCorrect(correctAnswer===answer);
     setChoice(answer);
+    console.log("answer: ", answer);
   }
 
   function reset() {
@@ -107,42 +97,23 @@ function Game() {
 
 
       <div className="flex gap-4 items-center flex-col sm:flex-row">
-        <ChoiceButton label="Lower" choice={choice} isCorrect={correct} handleClick={evaluateAnswer} />
-        <ChoiceButton label="Same" choice={choice} isCorrect={correct} handleClick={evaluateAnswer} />
-        <ChoiceButton label="Higher" choice={choice} isCorrect={correct} handleClick={evaluateAnswer} />
+        <ChoiceButton label="Lower" choice={choice} correctAnswer={correctAnswer} handleClick={evaluateAnswer} />
+        <ChoiceButton label="Same" choice={choice} correctAnswer={correctAnswer} handleClick={evaluateAnswer} />
+        <ChoiceButton label="Higher" choice={choice} correctAnswer={correctAnswer} handleClick={evaluateAnswer} />
       </div>
 
 
-      {
-        choice && (
-          (correct && <Banner isCorrect={true} reset={reset}/>) ||
-          (!correct && <Banner isCorrect={false} reset={reset}/>)
-        )
-      }
+      { choice && <Banner reset={reset} /> }
 
     </>
   );
 }
 
-function Banner({ isCorrect, reset}) {
-  let text;
-  let variant;
-  if (isCorrect) {
-    text = "Correct";
-    variant = "success";
-  } else {
-    text = "Incorrect";
-    variant = "danger";
-  }
+function Banner({ reset }) {
   return (
-    <>
-      { /* <Alert variant={variant}>
-        {text}
-      </Alert> */}
-      <Button variant="primary" size="lg" onClick={() => reset()}>
-        Next
-      </Button>
-    </>
+    <Button variant="primary" size="lg" onClick={() => reset()}>
+      Next
+    </Button>
   );
 }
 
@@ -185,3 +156,12 @@ function getRandomPitch() {
   return pitchFreqTable[Math.floor(Math.random()*pitchFreqTable.length)];
 }
 
+function getCorrectAnswer(pitches) {
+    if (pitches[0] === pitches[1]) {
+      return "Same";
+    } else if (pitches[0] < pitches[1]) {
+      return "Higher";
+    } else {
+      return "Lower";
+    }
+}
